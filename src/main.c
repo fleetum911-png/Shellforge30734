@@ -1,46 +1,76 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "lexer.h"
+#include "token.h"
+#include "history.h"
+
 int main(void)
 {
-    printf("=====================================\n");
-    printf("Shellforge\n");
-    printf("A Unix Style Shell written in C\n");
-    printf("=====================================\n");
+    char *input;
+    token_list_t list;
+printf("=====================================\n");
+printf("           Shellforge\n");
+printf("   A Unix Style Shell written in C\n");
+printf("=====================================\n\n");
+    printf("Shellforge\n\n");
+    printf("A Unix Style Shell written in C\n\n");
 
-    char *line;
+    while (1) {
 
-    while (1)
+        input = readline("shellforge$ ");
 
-    {
-        line = readline("shellforge$ ");
-
-        if (line == NULL)
-        {
-            printf("\nGoodbye!\n");
+        /*
+         * Ctrl+D
+         */
+        if (input == NULL) {
+            printf("\nExiting...\n");
             break;
         }
 
-        if (strlen(line) == 0)
-        {
-            free(line);
+        /*
+         * Ignore empty input.
+         */
+        if (input[0] == '\0') {
+            free(input);
             continue;
         }
 
-        add_history(line);
-
-        if (strcmp(line, "exit") == 0)
-        {
-            free(line);
+        /*
+         * Exit is not stored in history.
+         */
+        if (strcmp(input, "exit") == 0) {
+            free(input);
             printf("Exiting...\n");
             break;
         }
 
-        printf("YOU ENTERED : %s\n", line);
-        free(line);
+        /*
+         * Print command history.
+         */
+        if (strcmp(input, "history") == 0) {
+            shell_history_print();
+            free(input);
+            continue;
+        }
+
+        /*
+         * Add normal command to history.
+         */
+        add_history(input);
+
+        /*
+         * Tokenize the command.
+         */
+        if (lexer(input, &list) == 0) {
+            token_print(&list);
+        }
+
+        free(input);
     }
 
     return 0;
