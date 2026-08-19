@@ -6,7 +6,7 @@ LDFLAGS = -lreadline
 
 TARGET = shellforge
 
-SRC = src/history.c src/lexer.c src/main.c src/token.c
+SRC = src/history.c src/lexer.c src/main.c src/token.c src/parser.c src/expand.c
 
 OBJ = $(SRC:.c=.o)
 
