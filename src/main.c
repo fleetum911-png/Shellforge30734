@@ -10,6 +10,7 @@
 #include "parser.h"
 #include "expand.h"
 #include "history.h"
+#include "builtin.h"
 
 int main(void)
 {
@@ -26,48 +27,99 @@ int main(void)
 
         input = readline("shellforge$ ");
 
+        /*
+         * Ctrl+D / EOF
+         */
         if (input == NULL) {
             printf("\nExiting...\n");
             break;
         }
 
+        /*
+         * Ignore empty input
+         */
         if (input[0] == '\0') {
             free(input);
             continue;
         }
 
-        if (strcmp(input, "exit") == 0) {
-            free(input);
-            printf("Exiting...\n");
-            break;
-        }
-
+        /*
+         * Existing history builtin
+         */
         if (strcmp(input, "history") == 0) {
             shell_history_print();
             free(input);
             continue;
         }
 
+        /*
+         * Add command to readline history
+         */
         add_history(input);
 
+        /*
+         * Lex the input
+         */
         if (lexer(input, &tokens) == 0) {
 
+            /*
+             * Display tokens
+             */
             token_print(&tokens);
 
+            /*
+             * Parse tokens into commands
+             */
             if (parser(&tokens, &commands) == 0) {
 
+                /*
+                 * Perform variable/tilde expansion
+                 */
                 if (expand_command_list(&commands) == 0) {
-                    command_print(&commands);
+
+                    /*
+                     * Check for builtin commands
+                     *
+                     * Builtins:
+                     *   cd
+                     *   pwd
+                     *   echo
+                     *   exit
+                     */
+                    if (commands.count == 1 &&
+                        commands.commands[0].argc > 0 &&
+                        is_builtin(commands.commands[0].argv[0])) {
+
+                        execute_builtin(commands.commands[0].argv);
+
+                    } else {
+
+                        /*
+                         * Non-builtin commands.
+                         *
+                         * External command execution will be
+                         * handled in a later milestone.
+                         */
+                        command_print(&commands);
+                    }
+
                 } else {
+
                     fprintf(stderr, "Expansion failed\n");
                 }
 
+                /*
+                 * Free parsed command memory
+                 */
                 command_list_free(&commands);
 
             } else {
+
                 fprintf(stderr, "Parser error\n");
             }
+
         } else {
+
             fprintf(stderr, "Lexer error\n");
         }
 
