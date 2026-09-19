@@ -16,9 +16,9 @@
  *     cd ~
  *     cd <directory>
  */
-int builtin_cd(char **argv)
+int builtin_cd(char * const *argv)
 {
-    char *directory;
+    const char *directory;
 
     if (argv == NULL) {
         return 1;
@@ -67,7 +67,7 @@ int builtin_cd(char **argv)
  *
  * Prints the current working directory.
  */
-int builtin_pwd(char **argv)
+int builtin_pwd(char * const *argv)
 {
     char *current_directory;
 
@@ -103,7 +103,7 @@ int builtin_pwd(char **argv)
  * Output:
  *     Hello World
  */
-int builtin_echo(char **argv)
+int builtin_echo(char * const *argv)
 {
     int i = 1;
 
@@ -133,20 +133,22 @@ int builtin_echo(char **argv)
  *
  * Terminates Shellforge.
  */
-int builtin_exit(char **argv)
+int builtin_exit(char * const *argv)
 {
     (void)argv;
 
     printf("Exiting...\n");
 
     exit(0);
+
+    return 0;
 }
 
 
 /*
  * Check whether a command is a builtin.
  */
-int is_builtin(char *command)
+int is_builtin(const char *command)
 {
     if (command == NULL) {
         return 0;
@@ -175,7 +177,7 @@ int is_builtin(char *command)
 /*
  * Execute a builtin command.
  */
-int execute_builtin(char **argv)
+int execute_builtin(char * const *argv)
 {
     if (argv == NULL || argv[0] == NULL) {
         return 1;

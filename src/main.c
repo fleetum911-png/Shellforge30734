@@ -11,6 +11,8 @@
 #include "expand.h"
 #include "history.h"
 #include "builtin.h"
+#include "executor.h"
+
 
 int main(void)
 {
@@ -36,7 +38,7 @@ int main(void)
         }
 
         /*
-         * Ignore empty input
+         * Ignore empty input.
          */
         if (input[0] == '\0') {
             free(input);
@@ -44,7 +46,7 @@ int main(void)
         }
 
         /*
-         * Existing history builtin
+         * History command.
          */
         if (strcmp(input, "history") == 0) {
             shell_history_print();
@@ -53,55 +55,29 @@ int main(void)
         }
 
         /*
-         * Add command to readline history
+         * Add command to readline history.
          */
         add_history(input);
 
         /*
-         * Lex the input
+         * Lex input.
          */
         if (lexer(input, &tokens) == 0) {
 
             /*
-             * Display tokens
-             */
-            token_print(&tokens);
-
-            /*
-             * Parse tokens into commands
+             * Parse tokens.
              */
             if (parser(&tokens, &commands) == 0) {
 
                 /*
-                 * Perform variable/tilde expansion
+                 * Perform expansion.
                  */
                 if (expand_command_list(&commands) == 0) {
 
                     /*
-                     * Check for builtin commands
-                     *
-                     * Builtins:
-                     *   cd
-                     *   pwd
-                     *   echo
-                     *   exit
+                     * Execute the parsed command list.
                      */
-                    if (commands.count == 1 &&
-                        commands.commands[0].argc > 0 &&
-                        is_builtin(commands.commands[0].argv[0])) {
-
-                        execute_builtin(commands.commands[0].argv);
-
-                    } else {
-
-                        /*
-                         * Non-builtin commands.
-                         *
-                         * External command execution will be
-                         * handled in a later milestone.
-                         */
-                        command_print(&commands);
-                    }
+                    execute_command_list(&commands);
 
                 } else {
 
@@ -109,7 +85,7 @@ int main(void)
                 }
 
                 /*
-                 * Free parsed command memory
+                 * Free command memory.
                  */
                 command_list_free(&commands);
 
